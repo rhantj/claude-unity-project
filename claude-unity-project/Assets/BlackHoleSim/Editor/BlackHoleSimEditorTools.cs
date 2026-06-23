@@ -95,6 +95,9 @@ namespace BlackHoleSim.Editor
             Debug.Log("[Editor] Camera clearFlags set to SolidColor (black) for lens background");
         }
 
+        // MCP editor_invoke_method가 인자 전달을 지원하지 않아, 렌즈용 Bloom 값을 고정 호출하는 무인자 래퍼.
+        public static void TuneBloomForLens() => SetBloomIntensity(1.4f, 0.6f);
+
         public static void SetBloomIntensity(float intensity, float threshold)
         {
             const string profilePath = "Assets/Settings/SampleSceneProfile.asset";
