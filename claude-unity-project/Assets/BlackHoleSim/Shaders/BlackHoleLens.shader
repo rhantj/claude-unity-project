@@ -29,6 +29,11 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
             float _BHStepSize;
             float _BHHorizonRadius;
             int _BHStepCount;
+            float _BHDiskInner;
+            float _BHDiskOuter;
+            float _BHDiskTempInner;
+            float _BHDiskTempOuter;
+            float _BHDopplerStrength;
 
             struct Attributes
             {
@@ -83,10 +88,41 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                 return mu * invDist3 * r;
             }
 
+            // BlackBodyColor.Evaluate(BlackHoleSim/Runtime/BlackBodyColor.cs)의 HLSL 미러.
+            half3 BlackBodyColorApprox(float tempKelvin)
+            {
+                float t = clamp(tempKelvin, 1000.0, 40000.0) / 100.0;
+                float r = t <= 66.0
+                    ? 255.0
+                    : clamp(329.698727446 * pow(t - 60.0, -0.1332047592), 0.0, 255.0);
+                float g = t <= 66.0
+                    ? clamp(99.4708025861 * log(t) - 161.1195681661, 0.0, 255.0)
+                    : clamp(288.1221695283 * pow(t - 60.0, -0.0755148492), 0.0, 255.0);
+                float b = t >= 66.0
+                    ? 255.0
+                    : (t <= 19.0 ? 0.0 : clamp(138.5177312231 * log(t - 10.0) - 305.0447927307, 0.0, 255.0));
+                return half3(r, g, b) / 255.0;
+            }
+
+            half3 DiskColorAt(float3 hitPoint, float3 marchDir)
+            {
+                float radius = length(hitPoint.xz - _BHWorldPos.xz);
+                float u = saturate((radius - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 0.0001));
+                float temp = lerp(_BHDiskTempInner, _BHDiskTempOuter, u);
+                half3 baseColor = BlackBodyColorApprox(temp);
+
+                float3 tangent = normalize(cross(float3(0, 1, 0), hitPoint - _BHWorldPos));
+                float approach = dot(tangent, -marchDir);
+                float doppler = 1.0 + _BHDopplerStrength * approach;
+
+                return baseColor * max(doppler, 0.0);
+            }
+
             half3 March(float3 origin, float3 dir)
             {
                 float3 p = origin;
                 float3 d = dir;
+                float prevY = p.y - _BHWorldPos.y;
 
                 for (int i = 0; i < _BHStepCount; i++)
                 {
@@ -95,7 +131,20 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                         return half3(0, 0, 0);
 
                     d += AccelerationAt(_BHWorldPos, _BHLensMu, _BHSoftening, p) * _BHStepSize;
-                    p += normalize(d) * _BHStepSize;
+                    float3 next = p + normalize(d) * _BHStepSize;
+                    float nextY = next.y - _BHWorldPos.y;
+
+                    if (prevY * nextY < 0.0)
+                    {
+                        float tCross = prevY / (prevY - nextY);
+                        float3 hit = lerp(p, next, tCross);
+                        float radius = length(hit.xz - _BHWorldPos.xz);
+                        if (radius >= _BHDiskInner && radius <= _BHDiskOuter)
+                            return DiskColorAt(hit, normalize(d));
+                    }
+
+                    p = next;
+                    prevY = nextY;
                 }
 
                 return StarField(normalize(d));

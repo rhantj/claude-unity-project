@@ -623,11 +623,11 @@ MonoBehaviour:
   blackHole: {fileID: 1224449157}
   cam: {fileID: 330585545}
   diskInnerRadius: 4
-  diskOuterRadius: 14
+  diskOuterRadius: 10
   diskTempInnerKelvin: 18000
   diskTempOuterKelvin: 3000
   dopplerStrength: 0.6
-  lensStrength: 1
+  lensStrength: 0.01
   softening: 0.5
   stepSize: 0.25
   stepCount: 256

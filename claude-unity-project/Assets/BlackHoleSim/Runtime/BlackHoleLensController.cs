@@ -10,13 +10,14 @@ namespace BlackHoleSim
 
         [Header("Disk")]
         [SerializeField] float diskInnerRadius = 4f;
-        [SerializeField] float diskOuterRadius = 14f;
+        [SerializeField] float diskOuterRadius = 10f;
         [SerializeField] float diskTempInnerKelvin = 18000f;
         [SerializeField] float diskTempOuterKelvin = 3000f;
         [SerializeField] float dopplerStrength = 0.6f;
 
         [Header("Marching")]
-        [SerializeField] float lensStrength = 1f;
+        // 동역학 Mu(=G*mass, 수천 단위)를 광학 굴절에 곱하므로 작은 값이어야 디스크가 포획되지 않고 보인다.
+        [SerializeField] float lensStrength = 0.01f;
         [SerializeField] float softening = 0.5f;
         [SerializeField] float stepSize = 0.25f;
         [SerializeField] int stepCount = 256;
