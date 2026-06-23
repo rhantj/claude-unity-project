@@ -27,6 +27,7 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
             float _BHLensMu;
             float _BHSoftening;
             float _BHStepSize;
+            float _BHHorizonRadius;
             int _BHStepCount;
 
             struct Attributes
@@ -89,6 +90,10 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
 
                 for (int i = 0; i < _BHStepCount; i++)
                 {
+                    float3 toCenter = _BHWorldPos - p;
+                    if (dot(toCenter, toCenter) <= _BHHorizonRadius * _BHHorizonRadius)
+                        return half3(0, 0, 0);
+
                     d += AccelerationAt(_BHWorldPos, _BHLensMu, _BHSoftening, p) * _BHStepSize;
                     p += normalize(d) * _BHStepSize;
                 }
