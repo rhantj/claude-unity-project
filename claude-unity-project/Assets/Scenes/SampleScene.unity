@@ -383,6 +383,58 @@ MonoBehaviour:
   m_ShadowLayerMask: 1
   m_RenderingLayers: 1
   m_ShadowRenderingLayers: 1
+--- !u!1 &715563825
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 715563827}
+  - component: {fileID: 715563826}
+  m_Layer: 0
+  m_Name: SimController
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &715563826
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715563825}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e245ccb5583ac4f00aaf97b558a230e9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: BlackHoleSim.Runtime::BlackHoleSim.SimController
+  blackHole: {fileID: 1224449157}
+  cam: {fileID: 330585545}
+  throwablePrefab: {fileID: 6249992971617865961, guid: 952dee3492c644cb592f0d17808b9ac9, type: 3}
+  spawnDistance: 24
+  throwSpeedScale: 0.05
+  bodyMaxRadius: 80
+  orbitSpeed: 0.2
+  zoomSpeed: 2
+--- !u!4 &715563827
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 715563825}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &832575517
 GameObject:
   m_ObjectHideFlags: 0
@@ -5405,3 +5457,4 @@ SceneRoots:
   - {fileID: 832575519}
   - {fileID: 1224449160}
   - {fileID: 1937155401}
+  - {fileID: 715563827}

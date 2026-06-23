@@ -1,0 +1,8 @@
+{
+    "name": "BlackHoleSim.Editor",
+    "rootNamespace": "BlackHoleSim.Editor",
+    "references": ["BlackHoleSim.Runtime"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "autoReferenced": true
+}

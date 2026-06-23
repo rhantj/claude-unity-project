@@ -107,3 +107,6 @@ InitTestScene*.unity*
 
 # MCP plugin (embedded repo, not part of our source)
 /claude-unity-project/Assets/StreamingAssets/realvirtual-MCP
+
+# MCP screenshots (local only)
+/claude-unity-project/.screenshots/

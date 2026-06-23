@@ -13,6 +13,15 @@ namespace BlackHoleSim
         public float Mu => gravitationalConstant * mass;
         public float EventHorizonRadius => eventHorizonRadius;
 
+        void Awake()
+        {
+            // Own material instance (unlit black) so it never shares the default Lit asset.
+            var r = GetComponent<Renderer>();
+            if (r == null) return;
+            Shader s = Shader.Find("Universal Render Pipeline/Unlit") ?? Shader.Find("Unlit/Color");
+            if (s != null) r.material = new Material(s) { color = Color.black };
+        }
+
         public Vector3 AccelerationAt(Vector3 pos) =>
             GravityField.AccelerationAt(transform.position, Mu, softening, pos);
 
