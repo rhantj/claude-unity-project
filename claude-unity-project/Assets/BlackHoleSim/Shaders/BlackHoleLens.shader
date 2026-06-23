@@ -23,6 +23,12 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
             float _BHTanHalfFovY;
             float _BHStarDensity;
 
+            float3 _BHWorldPos;
+            float _BHLensMu;
+            float _BHSoftening;
+            float _BHStepSize;
+            int _BHStepCount;
+
             struct Attributes
             {
                 uint vertexID : SV_VertexID;
@@ -66,10 +72,34 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                 return half3(star, star, star);
             }
 
+            // GravityField.AccelerationAt(BlackHoleSim/Runtime/GravityField.cs)의 HLSL 미러.
+            float3 AccelerationAt(float3 source, float mu, float softening, float3 pos)
+            {
+                float3 r = source - pos;
+                float dist2 = dot(r, r) + softening * softening;
+                float invDist = rsqrt(max(dist2, 1e-6));
+                float invDist3 = invDist / dist2;
+                return mu * invDist3 * r;
+            }
+
+            half3 March(float3 origin, float3 dir)
+            {
+                float3 p = origin;
+                float3 d = dir;
+
+                for (int i = 0; i < _BHStepCount; i++)
+                {
+                    d += AccelerationAt(_BHWorldPos, _BHLensMu, _BHSoftening, p) * _BHStepSize;
+                    p += normalize(d) * _BHStepSize;
+                }
+
+                return StarField(normalize(d));
+            }
+
             half4 Frag(Varyings input) : SV_Target
             {
                 float3 dir = CameraRayDir(input.texcoord);
-                half3 color = StarField(dir);
+                half3 color = March(_BHCamPos, dir);
                 return half4(color, 1.0);
             }
             ENDHLSL
