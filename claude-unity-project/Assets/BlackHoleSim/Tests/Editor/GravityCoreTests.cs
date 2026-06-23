@@ -49,5 +49,20 @@ namespace BlackHoleSim.Tests
             float finalR = (pos - source).magnitude;
             Assert.That(finalR, Is.EqualTo(r).Within(0.3f), "radius should be conserved for a circular orbit");
         }
+
+        [Test]
+        public void BlackHole_IsCaptured_TrueInsideHorizon()
+        {
+            var go = new GameObject("bh");
+            go.transform.position = Vector3.zero;
+            var bh = go.AddComponent<BlackHole>();
+            bh.Configure(gravitationalConstant: 1f, mass: 100f, softening: 0.5f, eventHorizonRadius: 2f);
+
+            Assert.That(bh.IsCaptured(new Vector3(1f, 0f, 0f)), Is.True);
+            Assert.That(bh.IsCaptured(new Vector3(5f, 0f, 0f)), Is.False);
+            Assert.That(bh.Mu, Is.EqualTo(100f).Within(1e-4f));
+
+            Object.DestroyImmediate(go);
+        }
     }
 }
