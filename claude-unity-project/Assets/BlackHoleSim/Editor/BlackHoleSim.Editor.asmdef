@@ -1,7 +1,7 @@
 {
     "name": "BlackHoleSim.Editor",
     "rootNamespace": "BlackHoleSim.Editor",
-    "references": ["BlackHoleSim.Runtime"],
+    "references": ["BlackHoleSim.Runtime", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
     "includePlatforms": ["Editor"],
     "excludePlatforms": [],
     "autoReferenced": true

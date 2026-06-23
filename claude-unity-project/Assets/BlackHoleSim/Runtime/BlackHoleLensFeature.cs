@@ -49,9 +49,10 @@ namespace BlackHoleSim
                     builder.SetRenderAttachment(resourceData.activeColorTexture, 0);
                     builder.AllowPassCulling(false);
 
+                    // 풀스크린 삼각형 직접 드로우. Blit.hlsl/Blitter 경로는 이 URP RenderGraph 셋업에서 프래그먼트를 출력하지 않아 사용하지 않는다.
                     builder.SetRenderFunc((PassData data, RasterGraphContext ctx) =>
                     {
-                        Blitter.BlitTexture(ctx.cmd, Vector2.one, data.material, 0);
+                        ctx.cmd.DrawProcedural(Matrix4x4.identity, data.material, 0, MeshTopology.Triangles, 3, 1);
                     });
                 }
             }
