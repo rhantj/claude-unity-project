@@ -1,7 +1,7 @@
 {
     "name": "BlackHoleSim.Runtime",
     "rootNamespace": "BlackHoleSim",
-    "references": ["Unity.InputSystem"],
+    "references": ["Unity.InputSystem", "Unity.RenderPipelines.Universal.Runtime", "Unity.RenderPipelines.Core.Runtime"],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
