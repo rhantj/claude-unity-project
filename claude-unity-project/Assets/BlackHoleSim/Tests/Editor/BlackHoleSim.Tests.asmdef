@@ -1,0 +1,10 @@
+{
+    "name": "BlackHoleSim.Tests",
+    "rootNamespace": "BlackHoleSim.Tests",
+    "references": ["BlackHoleSim.Runtime", "UnityEngine.TestRunner", "UnityEditor.TestRunner"],
+    "includePlatforms": ["Editor"],
+    "excludePlatforms": [],
+    "precompiledReferences": ["nunit.framework.dll"],
+    "defineConstraints": ["UNITY_INCLUDE_TESTS"],
+    "autoReferenced": false
+}
