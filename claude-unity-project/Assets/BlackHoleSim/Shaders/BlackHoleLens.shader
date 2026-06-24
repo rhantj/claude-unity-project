@@ -68,6 +68,27 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                 return -1.5 * rs * h2 * invR5 * pos;
             }
 
+            // BlackBodyColor.Evaluate(BlackHoleSim/Runtime/BlackBodyColor.cs)의 HLSL 미러.
+            half3 BlackBodyColorApprox(float tempKelvin)
+            {
+                float t = clamp(tempKelvin, 1000.0, 40000.0) / 100.0;
+                float r = t <= 66.0 ? 255.0 : clamp(329.698727446 * pow(t - 60.0, -0.1332047592), 0.0, 255.0);
+                float g = t <= 66.0
+                    ? clamp(99.4708025861 * log(t) - 161.1195681661, 0.0, 255.0)
+                    : clamp(288.1221695283 * pow(t - 60.0, -0.0755148492), 0.0, 255.0);
+                float b = t >= 66.0 ? 255.0 : (t <= 19.0 ? 0.0 : clamp(138.5177312231 * log(t - 10.0) - 305.0447927307, 0.0, 255.0));
+                return half3(r, g, b) / 255.0;
+            }
+
+            // 디스크 슬랩 밀도: 반경 falloff(안쪽 진함) × 수직 가우시안.
+            float DiskDensity(float rCyl, float absY)
+            {
+                if (rCyl < _BHDiskInner || rCyl > _BHDiskOuter || absY > _BHDiskThickness) return 0.0;
+                float u = saturate((rCyl - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 1e-4));
+                float vGauss = exp(-pow(absY / (0.5 * _BHDiskThickness), 2.0));
+                return _BHDiskDensity * (1.0 - u) * vGauss;
+            }
+
             // 측지선 적분. BH 중심 좌표(pos = world - _BHWorldPos). 반환: HDR 색.
             half3 March(float3 worldOrigin, float3 dir)
             {
@@ -78,6 +99,7 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                 float h2 = dot(cross(pos, vel), cross(pos, vel));
 
                 half3 accum = 0;
+                float trans = 1.0;
                 float minR = 1e9;
 
                 for (int i = 0; i < _BHStepCount; i++)
@@ -86,6 +108,18 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                     minR = min(minR, r);
                     if (r <= rs) return accum; // 호라이즌(앞쪽 누적색 유지)
 
+                    float rCyl = length(pos.xz);
+                    float dens = DiskDensity(rCyl, abs(pos.y));
+                    if (dens > 0.0)
+                    {
+                        float u = saturate((rCyl - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 1e-4));
+                        float temp = lerp(_BHDiskTempInner, _BHDiskTempOuter, u);
+                        half3 emit = BlackBodyColorApprox(temp) * dens;
+                        accum += trans * emit * _BHStepSize;
+                        trans *= exp(-dens * _BHStepSize);
+                        if (trans < 0.01) return accum;
+                    }
+
                     float3 a0 = GeodesicAccel(pos, h2, rs);
                     float3 nextPos = pos + vel * _BHStepSize + 0.5 * a0 * _BHStepSize * _BHStepSize;
                     float3 a1 = GeodesicAccel(nextPos, h2, rs);
@@ -93,11 +127,11 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                     pos = nextPos;
                 }
 
-                accum += StarField(normalize(vel));
+                accum += trans * StarField(normalize(vel));
 
                 // 포톤 링: 광선의 최근접 반경이 포톤 스피어에 가까울수록 밝은 고리.
                 float ring = _BHPhotonRing * exp(-pow((minR - photonR) / (0.18 * rs), 2.0));
-                accum += ring * half3(1.0, 0.95, 0.85);
+                accum += trans * ring * half3(1.0, 0.95, 0.85);
 
                 return accum;
             }
