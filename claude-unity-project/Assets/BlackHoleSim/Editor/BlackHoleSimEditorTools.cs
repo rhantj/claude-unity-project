@@ -98,6 +98,30 @@ namespace BlackHoleSim.Editor
         // MCP editor_invoke_method가 인자 전달을 지원하지 않아, 렌즈용 Bloom 값을 고정 호출하는 무인자 래퍼.
         public static void TuneBloomForLens() => SetBloomIntensity(1.4f, 0.6f);
 
+        public static void SetTonemappingACES()
+        {
+            const string profilePath = "Assets/Settings/SampleSceneProfile.asset";
+            var profile = AssetDatabase.LoadAssetAtPath<VolumeProfile>(profilePath);
+            if (profile == null) { Debug.LogWarning("[Editor] Volume profile not found: " + profilePath); return; }
+
+            if (!profile.TryGet(out Tonemapping tm))
+                tm = profile.Add<Tonemapping>(true);
+            tm.mode.overrideState = true;
+            tm.mode.value = TonemappingMode.ACES;
+            EditorUtility.SetDirty(profile);
+            AssetDatabase.SaveAssets();
+            Debug.Log("[Editor] Tonemapping set to ACES");
+        }
+
+        public static void SetParticleFieldActive(bool active)
+        {
+            var pf = Object.FindAnyObjectByType<BlackHoleSim.ParticleField>(FindObjectsInactive.Include);
+            if (pf == null) { Debug.LogWarning("[Editor] ParticleField not found"); return; }
+            pf.gameObject.SetActive(active);
+            UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(pf.gameObject.scene);
+            Debug.Log("[Editor] ParticleField active=" + active);
+        }
+
         public static void SetBloomIntensity(float intensity, float threshold)
         {
             const string profilePath = "Assets/Settings/SampleSceneProfile.asset";

@@ -15,43 +15,25 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
             #pragma fragment Frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
-            float3 _BHCamPos;
-            float3 _BHCamForward;
-            float3 _BHCamRight;
-            float3 _BHCamUp;
-            float _BHTanHalfFovX;
-            float _BHTanHalfFovY;
-            float _BHStarDensity;
-
+            float3 _BHCamPos, _BHCamForward, _BHCamRight, _BHCamUp;
+            float _BHTanHalfFovX, _BHTanHalfFovY, _BHStarDensity;
             float3 _BHWorldPos;
-            float _BHLensMu;
-            float _BHSoftening;
+            float _BHRs;
+            float _BHDiskInner, _BHDiskOuter, _BHDiskThickness, _BHDiskDensity;
+            float _BHDiskTempInner, _BHDiskTempOuter;
+            float _BHBeaming, _BHRedshift, _BHPhotonRing;
             float _BHStepSize;
-            float _BHHorizonRadius;
             int _BHStepCount;
-            float _BHDiskInner;
-            float _BHDiskOuter;
-            float _BHDiskTempInner;
-            float _BHDiskTempOuter;
-            float _BHDopplerStrength;
 
-            struct Attributes
-            {
-                uint vertexID : SV_VertexID;
-            };
-
-            struct Varyings
-            {
-                float4 positionCS : SV_POSITION;
-                float2 texcoord : TEXCOORD0;
-            };
+            struct Attributes { uint vertexID : SV_VertexID; };
+            struct Varyings { float4 positionCS : SV_POSITION; float2 texcoord : TEXCOORD0; };
 
             Varyings Vert(Attributes input)
             {
-                Varyings output;
-                output.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
-                output.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
-                return output;
+                Varyings o;
+                o.positionCS = GetFullScreenTriangleVertexPosition(input.vertexID);
+                o.texcoord = GetFullScreenTriangleTexCoord(input.vertexID);
+                return o;
             }
 
             float Hash13(float3 p)
@@ -78,76 +60,103 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
                 return half3(star, star, star);
             }
 
-            // GravityField.AccelerationAt(BlackHoleSim/Runtime/GravityField.cs)의 HLSL 미러.
-            float3 AccelerationAt(float3 source, float mu, float softening, float3 pos)
+            float3 GeodesicAccel(float3 pos, float h2, float rs)
             {
-                float3 r = source - pos;
-                float dist2 = dot(r, r) + softening * softening;
-                float invDist = rsqrt(max(dist2, 1e-6));
-                float invDist3 = invDist / dist2;
-                return mu * invDist3 * r;
+                float r2 = dot(pos, pos);
+                float invR5 = 1.0 / (r2 * r2 * sqrt(r2));
+                return -1.5 * rs * h2 * invR5 * pos;
             }
 
-            // BlackBodyColor.Evaluate(BlackHoleSim/Runtime/BlackBodyColor.cs)의 HLSL 미러.
             half3 BlackBodyColorApprox(float tempKelvin)
             {
                 float t = clamp(tempKelvin, 1000.0, 40000.0) / 100.0;
-                float r = t <= 66.0
-                    ? 255.0
-                    : clamp(329.698727446 * pow(t - 60.0, -0.1332047592), 0.0, 255.0);
+                float r = t <= 66.0 ? 255.0 : clamp(329.698727446 * pow(t - 60.0, -0.1332047592), 0.0, 255.0);
                 float g = t <= 66.0
                     ? clamp(99.4708025861 * log(t) - 161.1195681661, 0.0, 255.0)
                     : clamp(288.1221695283 * pow(t - 60.0, -0.0755148492), 0.0, 255.0);
-                float b = t >= 66.0
-                    ? 255.0
-                    : (t <= 19.0 ? 0.0 : clamp(138.5177312231 * log(t - 10.0) - 305.0447927307, 0.0, 255.0));
+                float b = t >= 66.0 ? 255.0 : (t <= 19.0 ? 0.0 : clamp(138.5177312231 * log(t - 10.0) - 305.0447927307, 0.0, 255.0));
                 return half3(r, g, b) / 255.0;
             }
 
-            half3 DiskColorAt(float3 hitPoint, float3 marchDir)
+            float DiskDensity(float rCyl, float absY)
             {
-                float radius = length(hitPoint.xz - _BHWorldPos.xz);
-                float u = saturate((radius - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 0.0001));
-                float temp = lerp(_BHDiskTempInner, _BHDiskTempOuter, u);
-                half3 baseColor = BlackBodyColorApprox(temp);
-
-                float3 tangent = normalize(cross(float3(0, 1, 0), hitPoint - _BHWorldPos));
-                float approach = dot(tangent, -marchDir);
-                float doppler = 1.0 + _BHDopplerStrength * approach;
-
-                return baseColor * max(doppler, 0.0);
+                if (rCyl < _BHDiskInner || rCyl > _BHDiskOuter || absY > _BHDiskThickness) return 0.0;
+                float u = saturate((rCyl - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 1e-4));
+                float vGauss = exp(-pow(absY / (0.5 * _BHDiskThickness), 2.0));
+                return _BHDiskDensity * (1.0 - u) * vGauss;
             }
 
-            half3 March(float3 origin, float3 dir)
+            // Relativity(BlackHoleSim/Runtime/Relativity.cs)의 HLSL 미러.
+            float OrbitalSpeedRel(float r, float rs)
             {
-                float3 p = origin;
-                float3 d = dir;
-                float prevY = p.y - _BHWorldPos.y;
+                float denom = r - rs;
+                if (denom <= 0.0) return 0.0;
+                return min(sqrt((rs * 0.5) / denom), 0.999);
+            }
+            float DopplerFactor(float beta, float cosAngle)
+            {
+                float gamma = 1.0 / sqrt(max(1.0 - beta * beta, 1e-6));
+                return 1.0 / (gamma * (1.0 - beta * cosAngle));
+            }
+            float GravRedshift(float r, float rs)
+            {
+                return sqrt(max(1.0 - rs / r, 0.0));
+            }
+
+            half3 March(float3 worldOrigin, float3 dir)
+            {
+                float rs = _BHRs;
+                float photonR = 1.5 * rs;
+                float3 pos = worldOrigin - _BHWorldPos;
+                float3 vel = dir;
+                float h2 = dot(cross(pos, vel), cross(pos, vel));
+
+                half3 accum = 0;
+                float trans = 1.0;
+                float minR = 1e9;
 
                 for (int i = 0; i < _BHStepCount; i++)
                 {
-                    float3 toCenter = _BHWorldPos - p;
-                    if (dot(toCenter, toCenter) <= _BHHorizonRadius * _BHHorizonRadius)
-                        return half3(0, 0, 0);
+                    float r = length(pos);
+                    minR = min(minR, r);
+                    if (r <= rs) return accum;
 
-                    d += AccelerationAt(_BHWorldPos, _BHLensMu, _BHSoftening, p) * _BHStepSize;
-                    float3 next = p + normalize(d) * _BHStepSize;
-                    float nextY = next.y - _BHWorldPos.y;
-
-                    if (prevY * nextY < 0.0)
+                    float rCyl = length(pos.xz);
+                    float dens = DiskDensity(rCyl, abs(pos.y));
+                    if (dens > 0.0)
                     {
-                        float tCross = prevY / (prevY - nextY);
-                        float3 hit = lerp(p, next, tCross);
-                        float radius = length(hit.xz - _BHWorldPos.xz);
-                        if (radius >= _BHDiskInner && radius <= _BHDiskOuter)
-                            return DiskColorAt(hit, normalize(d));
+                        float u = saturate((rCyl - _BHDiskInner) / max(_BHDiskOuter - _BHDiskInner, 1e-4));
+                        float temp = lerp(_BHDiskTempInner, _BHDiskTempOuter, u);
+
+                        // 궤도 운동: xz평면 접선 방향. 광선 진행 방향(vel) 대비 접근/후퇴.
+                        float beta = OrbitalSpeedRel(length(pos), rs);
+                        float3 tangent = normalize(cross(float3(0, 1, 0), pos));
+                        float cosAng = dot(tangent, -normalize(vel));
+                        float shift = DopplerFactor(beta, cosAng) * GravRedshift(length(pos), rs);
+
+                        // 주파수 이동: 색온도(파랑/빨강)와 세기(빔ing ∝ shift⁴)에 반영.
+                        float tShift = lerp(1.0, shift, _BHRedshift);
+                        half3 emit = BlackBodyColorApprox(temp * tShift) * dens;
+                        emit *= lerp(1.0, pow(max(shift, 0.0), 4.0), _BHBeaming);
+
+                        accum += trans * emit * _BHStepSize;
+                        trans *= exp(-dens * _BHStepSize);
+                        if (trans < 0.01) return accum;
                     }
 
-                    p = next;
-                    prevY = nextY;
+                    float3 a0 = GeodesicAccel(pos, h2, rs);
+                    float3 nextPos = pos + vel * _BHStepSize + 0.5 * a0 * _BHStepSize * _BHStepSize;
+                    float3 a1 = GeodesicAccel(nextPos, h2, rs);
+                    vel += 0.5 * (a0 + a1) * _BHStepSize;
+                    pos = nextPos;
                 }
 
-                return StarField(normalize(d));
+                accum += trans * StarField(normalize(vel));
+
+                float ring = _BHPhotonRing * exp(-pow((minR - photonR) / (0.18 * rs), 2.0));
+                accum += trans * ring * half3(1.0, 0.95, 0.85);
+
+                return accum;
             }
 
             half4 Frag(Varyings input) : SV_Target
