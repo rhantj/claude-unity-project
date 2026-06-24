@@ -22,10 +22,11 @@ namespace BlackHoleSim
             if (s != null) r.material = new Material(s) { color = Color.black };
         }
 
+        // PW 중력의 r_s로 eventHorizonRadius를 사용한다. (softening은 광학 렌즈 셰이더 미러용으로 보존)
         public Vector3 AccelerationAt(Vector3 pos) =>
-            GravityField.AccelerationAt(transform.position, Mu, softening, pos);
+            GravityField.AccelerationAt(transform.position, Mu, eventHorizonRadius, pos);
 
-        public float OrbitalSpeed(float radius) => GravityField.OrbitalSpeed(Mu, radius);
+        public float OrbitalSpeed(float radius) => GravityField.OrbitalSpeed(Mu, radius, eventHorizonRadius);
 
         public bool IsCaptured(Vector3 pos)
         {
