@@ -16,6 +16,7 @@ namespace BlackHoleSim
         [SerializeField] float diskDensity = 1.2f;
         [SerializeField] float diskTempInnerKelvin = 18000f;
         [SerializeField] float diskTempOuterKelvin = 3000f;
+        [SerializeField] Color diskColorTint = new Color(1f, 0.78f, 0.55f); // 옅은 주황
 
         [Header("Relativity")]
         [SerializeField, Range(0f, 1f)] float beamingStrength = 1f;
@@ -37,6 +38,7 @@ namespace BlackHoleSim
         static readonly int BHDiskDensity = Shader.PropertyToID("_BHDiskDensity");
         static readonly int BHDiskTempInner = Shader.PropertyToID("_BHDiskTempInner");
         static readonly int BHDiskTempOuter = Shader.PropertyToID("_BHDiskTempOuter");
+        static readonly int BHDiskColorTint = Shader.PropertyToID("_BHDiskColorTint");
         static readonly int BHBeaming = Shader.PropertyToID("_BHBeaming");
         static readonly int BHRedshift = Shader.PropertyToID("_BHRedshift");
         static readonly int BHPhotonRing = Shader.PropertyToID("_BHPhotonRing");
@@ -66,6 +68,7 @@ namespace BlackHoleSim
             Shader.SetGlobalFloat(BHDiskDensity, diskDensity);
             Shader.SetGlobalFloat(BHDiskTempInner, diskTempInnerKelvin);
             Shader.SetGlobalFloat(BHDiskTempOuter, diskTempOuterKelvin);
+            Shader.SetGlobalColor(BHDiskColorTint, diskColorTint);
             Shader.SetGlobalFloat(BHBeaming, beamingStrength);
             Shader.SetGlobalFloat(BHRedshift, redshiftStrength);
             Shader.SetGlobalFloat(BHPhotonRing, photonRing);

@@ -63,6 +63,7 @@ Packages/io.realvirtual.mcp/      # Unity MCP 브릿지 (에이전트 제어)
 | `diskDensity` | 1.2 | 원반 밀도(광학 깊이 스케일) |
 | `diskTempInnerKelvin` | 18000 | 원반 내측 온도(K) — `BlackBodyColor` 입력 |
 | `diskTempOuterKelvin` | 3000 | 원반 외측 온도(K) |
+| `diskColorTint` | (1, 0.78, 0.55) 옅은 주황 | 원반 색조 틴트 — 흑체색에 곱해짐 |
 | `beamingStrength` (0~1) | 1 | 도플러 빔ing 강도 |
 | `redshiftStrength` (0~1) | 1 | 중력 적색편이 강도 |
 | `photonRing` (0~4) | 1.5 | 포톤 링 강조 계수 |

@@ -21,6 +21,7 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
             float _BHRs;
             float _BHDiskInner, _BHDiskOuter, _BHDiskThickness, _BHDiskDensity;
             float _BHDiskTempInner, _BHDiskTempOuter;
+            float3 _BHDiskColorTint;
             float _BHBeaming, _BHRedshift, _BHPhotonRing;
             float _BHStepSize;
             int _BHStepCount;
@@ -136,7 +137,7 @@ Shader "Hidden/BlackHoleSim/BlackHoleLens"
 
                         // 주파수 이동: 색온도(파랑/빨강)와 세기(빔ing ∝ shift⁴)에 반영.
                         float tShift = lerp(1.0, shift, _BHRedshift);
-                        half3 emit = BlackBodyColorApprox(temp * tShift) * dens;
+                        half3 emit = BlackBodyColorApprox(temp * tShift) * _BHDiskColorTint * dens;
                         emit *= lerp(1.0, pow(max(shift, 0.0), 4.0), _BHBeaming);
 
                         accum += trans * emit * _BHStepSize;
