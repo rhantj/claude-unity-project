@@ -3,8 +3,8 @@ using UnityEngine;
 
 namespace BlackHoleSim.UI
 {
-    /// <summary>BlackHole/BlackHoleLensController/ParticleField パラメータをObservableValueで露出するViewModel.
-    /// 単方向バインディング: ObservableValue変更 → Model setter即時反映.</summary>
+    /// <summary>BlackHole/BlackHoleLensController/ParticleField 파라미터를 ObservableValue로 노출하는 ViewModel.
+    /// 단방향 바인딩: ObservableValue 변경 → Model setter 즉시 반영.</summary>
     public class BlackHoleParamsViewModel
     {
         public readonly ObservableValue<float> DiskInnerRadius;
