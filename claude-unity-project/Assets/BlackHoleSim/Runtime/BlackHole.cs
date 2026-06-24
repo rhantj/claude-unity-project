@@ -10,8 +10,31 @@ namespace BlackHoleSim
         [SerializeField] float softening = 0.5f;
         [SerializeField] float eventHorizonRadius = 2f;
 
+        public float GravitationalConstant
+        {
+            get => gravitationalConstant;
+            set => gravitationalConstant = value;
+        }
+
+        public float Mass
+        {
+            get => mass;
+            set => mass = value;
+        }
+
+        public float Softening
+        {
+            get => softening;
+            set => softening = value;
+        }
+
+        public float EventHorizonRadius
+        {
+            get => eventHorizonRadius;
+            set => eventHorizonRadius = value;
+        }
+
         public float Mu => gravitationalConstant * mass;
-        public float EventHorizonRadius => eventHorizonRadius;
 
         void Awake()
         {
