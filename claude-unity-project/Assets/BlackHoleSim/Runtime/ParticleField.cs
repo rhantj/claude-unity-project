@@ -28,7 +28,6 @@ namespace BlackHoleSim
             accelFn = blackHole.AccelerationAt;
 
             var main = ps.main;
-            main.maxParticles = count;
             main.simulationSpace = ParticleSystemSimulationSpace.World;
             main.playOnAwake = false;
             var emission = ps.emission;
@@ -36,11 +35,31 @@ namespace BlackHoleSim
 
             EnsureRenderMaterial();
 
+            Reinitialize(count);
+        }
+
+        public void Reinitialize(int newCount)
+        {
+            if (ps == null) ps = GetComponent<ParticleSystem>();
+            count = Mathf.Max(1, newCount);
+
+            var main = ps.main;
+            main.maxParticles = count;
+
             pos = new Vector3[count];
             vel = new Vector3[count];
             rendered = new ParticleSystem.Particle[count];
             for (int i = 0; i < count; i++) Spawn(i);
         }
+
+        public int Count { get => count; set => Reinitialize(value); }
+        public float InnerRadius { get => innerRadius; set => innerRadius = value; }
+        public float OuterRadius { get => outerRadius; set => outerRadius = value; }
+        public float DiskThickness { get => diskThickness; set => diskThickness = value; }
+        public float SpeedJitter { get => speedJitter; set => speedJitter = value; }
+        public float MaxRadius { get => maxRadius; set => maxRadius = value; }
+        public float InfallSpeedFactor { get => infallSpeedFactor; set => infallSpeedFactor = value; }
+        public float ParticleSize { get => particleSize; set => particleSize = value; }
 
         // The default ParticleSystem material is not URP-compatible (renders magenta).
         // Assign an unlit additive material so particles render correctly under URP.
