@@ -624,13 +624,15 @@ MonoBehaviour:
   cam: {fileID: 330585545}
   diskInnerRadius: 4
   diskOuterRadius: 10
+  diskThickness: 0.5
+  diskDensity: 1.2
   diskTempInnerKelvin: 18000
   diskTempOuterKelvin: 3000
-  dopplerStrength: 0.6
-  lensStrength: 0.01
-  softening: 0.5
-  stepSize: 0.25
+  beamingStrength: 1
+  redshiftStrength: 1
+  photonRing: 1.5
   stepCount: 256
+  stepSize: 0.25
   starDensity: 0.0025
 --- !u!4 &1497462385
 Transform:
@@ -665,7 +667,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1937155398
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -685,6 +687,7 @@ MonoBehaviour:
   diskThickness: 0.4
   speedJitter: 0.12
   maxRadius: 45
+  infallSpeedFactor: 0.65
   particleSize: 0.18
 --- !u!199 &1937155399
 ParticleSystemRenderer:
