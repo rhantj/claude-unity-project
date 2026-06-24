@@ -1,5 +1,7 @@
 # claude-unity-project
 
+![블랙홀 시뮬레이션 스크린샷](docs/images/blackhole-screenshot.png)
+
 Unity(URP) 기반 블랙홀 시뮬레이션. Paczyński–Wiita 유사-뉴턴 중력 + 슈바르츠실트 측지선 레이마칭 광학 + 볼륨메트릭 강착원반 + 상대론적 도플러 빔ing/중력 적색편이를 구현한다. Unity MCP 브릿지(`io.realvirtual.mcp`)를 통해 Claude 에이전트가 에디터/씬을 직접 조작할 수 있다.
 
 ## 개요
