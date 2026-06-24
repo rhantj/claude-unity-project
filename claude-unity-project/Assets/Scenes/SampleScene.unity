@@ -622,8 +622,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: BlackHoleSim.Runtime::BlackHoleSim.BlackHoleLensController
   blackHole: {fileID: 1224449157}
   cam: {fileID: 330585545}
-  diskInnerRadius: 4
-  diskOuterRadius: 10
+  diskInnerRadius: 6
+  diskOuterRadius: 14
   diskThickness: 0.5
   diskDensity: 1.2
   diskTempInnerKelvin: 18000
@@ -631,7 +631,7 @@ MonoBehaviour:
   beamingStrength: 1
   redshiftStrength: 1
   photonRing: 1.5
-  stepCount: 256
+  stepCount: 400
   stepSize: 0.25
   starDensity: 0.0025
 --- !u!4 &1497462385
