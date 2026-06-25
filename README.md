@@ -113,6 +113,20 @@ Packages/io.realvirtual.mcp/      # Unity MCP 브릿지 (에이전트 제어)
 
 `Assets/BlackHoleSim/Tests/Editor`에 EditMode 테스트 존재. Unity Test Runner(Window > General > Test Runner)에서 EditMode 탭으로 실행, 또는 MCP 에디터 도구로 실행.
 
+## 런타임 UI 패널
+
+![ParamPanel](docs/images/blackhole-ui-panel.png)
+
+플레이 모드에서 화면 우측에 표시되는 파라미터 패널. `Tab` 키 또는 헤더의 `-` 버튼으로 패널 전체를 접고 펼 수 있다.
+
+- **Disk**: 강착원반 내/외경, 두께, 밀도, 내·외측 온도(K), 색조 틴트(RGB)
+- **Relativity**: 빔잉(Beaming) 강도, 중력 적색편이 강도, 광자구 두께
+- **Render Quality**: 레이마칭 스텝 수/크기, 배경 별 밀도
+- **Particles**: 입자 강착원반 토글 및 개수/반경/두께/지터/낙하속도 등
+- **Danger Zone** (붉은 강조): G(중력상수), 질량, 소프트닝, 사건의 지평선 반경 — 시뮬레이션이 깨질 수 있는 민감한 값
+
+패널은 `Assets/BlackHoleSim/Editor/BlackHoleSimUIBuilder.cs`의 에디터 빌더 스크립트가 UGUI 계층(Canvas + ScrollRect + 5개 CollapsibleSection + 각 파라미터 행)을 코드로 생성하고, `ParamPanelView`의 모든 필드를 `SerializedObject`로 와이어링한다. Unity MCP 브리지는 RectTransform(anchor/pivot/sizeDelta)을 직접 조작할 수 없어, 이 빌더를 `editor_invoke_method`로 1회 호출해 씬에 반영하는 방식을 사용했다.
+
 ## MCP 연동
 
 `Packages/io.realvirtual.mcp`가 Unity 에디터를 WebSocket 브릿지로 노출해 Claude가 씬 조회/수정, GameObject/Component/Transform 조작, 시뮬레이션 재생/일시정지, 스크린샷 등을 직접 수행할 수 있게 한다.
