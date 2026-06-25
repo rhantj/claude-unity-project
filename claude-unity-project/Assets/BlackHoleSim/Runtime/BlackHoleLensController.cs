@@ -30,6 +30,20 @@ namespace BlackHoleSim
         [Header("Stars")]
         [SerializeField] float starDensity = 0.0025f;
 
+        public float DiskInnerRadius { get => diskInnerRadius; set => diskInnerRadius = value; }
+        public float DiskOuterRadius { get => diskOuterRadius; set => diskOuterRadius = value; }
+        public float DiskThickness { get => diskThickness; set => diskThickness = value; }
+        public float DiskDensity { get => diskDensity; set => diskDensity = value; }
+        public float DiskTempInnerKelvin { get => diskTempInnerKelvin; set => diskTempInnerKelvin = value; }
+        public float DiskTempOuterKelvin { get => diskTempOuterKelvin; set => diskTempOuterKelvin = value; }
+        public Color DiskColorTint { get => diskColorTint; set => diskColorTint = value; }
+        public float BeamingStrength { get => beamingStrength; set => beamingStrength = value; }
+        public float RedshiftStrength { get => redshiftStrength; set => redshiftStrength = value; }
+        public float PhotonRing { get => photonRing; set => photonRing = value; }
+        public int StepCount { get => stepCount; set => stepCount = value; }
+        public float StepSize { get => stepSize; set => stepSize = value; }
+        public float StarDensity { get => starDensity; set => starDensity = value; }
+
         static readonly int BHWorldPos = Shader.PropertyToID("_BHWorldPos");
         static readonly int BHRs = Shader.PropertyToID("_BHRs");
         static readonly int BHDiskInner = Shader.PropertyToID("_BHDiskInner");
