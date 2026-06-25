@@ -56,6 +56,12 @@ namespace BlackHoleSim.UI
 
         void Awake()
         {
+            if (blackHole == null || lens == null || particles == null)
+            {
+                Debug.LogError("[ParamPanelView] Model references not wired (blackHole/lens/particles); panel disabled.");
+                return;
+            }
+
             vm = new BlackHoleParamsViewModel(blackHole, lens, particles);
 
             diskInnerRadiusRow.Bind("Disk Inner Radius", vm.DiskInnerRadius, 0f, 30f);
@@ -98,6 +104,8 @@ namespace BlackHoleSim.UI
 
         void Update()
         {
+            if (vm == null) return;
+
             var kb = Keyboard.current;
             if (kb != null && kb.tabKey.wasPressedThisFrame)
                 vm.PanelExpanded.Value = !vm.PanelExpanded.Value;
